@@ -20,19 +20,22 @@ int leftDaysCalculator(int year, int month, int day) {
     result += day - currentDay;
     return result;
 }
+bool isTask = true;
 vector<string> addTaskExtractInformations(string str) {
     vector<string> result;
     string word;
-    int i = 8;
+    int i = 9;
+    if (!isTask)
+        i += 3;
     while (i < int(str.length())) {
-        i++;
         if (str[i] == ',') {
             result.push_back(word);
             word.clear();
-            i++;
+            i += 2;
             continue;
         }
         word += str[i];
+        i++;
     }
     result.push_back(word);
     return result;
@@ -40,7 +43,39 @@ vector<string> addTaskExtractInformations(string str) {
 class Deadline {
 public:
     int year, month, day, leftDays, hour, minute;
-    Deadline(string str) {
+    string date;
+    // Deadline() {
+    //     // int arr[] = {0, 0, 0};
+    //     // int i = 0, j = 0;
+    //     // while (str[i] != ' ') {
+    //     //     if (str[i] == '/') {
+    //     //         i++;
+    //     //         arr[j] /= 10;
+    //     //         j++;
+    //     //         continue;
+    //     //     }
+    //     //     arr[j] += str[i] - 48;
+    //     //     arr[j] *= 10;
+    //     //     date += str[i];
+    //     //     i++;
+    //     // }
+    //     // arr[2] /= 10;
+    //     // i++;
+    //     // j = 0;
+    //     // while (str[i] != ':') {
+    //     //     j += str[i] - 48;
+    //     //     j *= 10;
+    //     //     i++;
+    //     // }
+    //     // hour = j / 10;
+    //     // i++;
+    //     // minute = (str[i++] - 48) * 10 + (str[i] - 48);
+    //     // year = arr[0];
+    //     // month = arr[1];
+    //     // day = arr[2];
+    //     // leftDays = leftDaysCalculator(year, month, day);
+    // }
+    void makeDeadline(string str) {
         int arr[] = {0, 0, 0};
         int i = 0, j = 0;
         while (str[i] != ' ') {
@@ -54,6 +89,7 @@ public:
             arr[j] *= 10;
             i++;
         }
+        arr[2] /= 10;
         i++;
         j = 0;
         while (str[i] != ':') {
@@ -66,8 +102,9 @@ public:
         minute = (str[i++] - 48) * 10 + (str[i] - 48);
         year = arr[0];
         month = arr[1];
-        day = arr[2] / 10;
+        day = arr[2];
         leftDays = leftDaysCalculator(year, month, day);
+        date = to_string(year) + '/' + to_string(month) + '/' + to_string(day);
     }
 };
 class Task;
@@ -77,70 +114,23 @@ public:
     Subtask *next;
     Subtask *previous;
     Task *parent;
-    // Subtask(string name, string exp, string state, int y, int m, int d, Subtask
-    // *nxt, Subtask *pre)
-    Subtask(vector<string> str, Subtask *nxt, Subtask *pre, Task *p) {
-        this->name = str[0];
-        description = str[1];
-        status = str[3];
-        taskName = str[4];
-        next = nxt;
-        previous = pre;
-        parent = p;
-        Deadline deadline(str[2]);
+    Deadline deadline;
+    Subtask() {
+        string str;
+        cout << "Enter task: ";
+        cin.ignore();
+        getline(cin, str);
+        vector<string> ss = addTaskExtractInformations(str);
+        name = ss[0];
+        description = ss[1];
+        status = ss[3];
+        taskName = ss[4];
+        next = nullptr;
+        previous = nullptr;
+        parent = nullptr;
+        deadline.makeDeadline(ss[2]);
     }
 };
-// class Queue {
-// public:
-//     vector<Subtask> subtasks[10];
-//     Subtask *Qhead;
-//     Subtask *Qtail;
-//     int QSize;
-//     int Qlen = sizeof subtasks/sizeof subtasks[0];
-//     Queue() {
-//         Qhead = nullptr;
-//         Qtail = nullptr;
-//         QSize = 0;
-//     }
-//     int qSize() {
-//         return QSize;
-//     }
-//     // void enqueue(int Q[], int node) {
-//     //     if (QSize == Qlen)
-//     //         cout << "Overflow!" << endl;
-//     //     else {
-//     //         *Qtail = node;
-//     //         QSize++;
-//     //         if(Qtail == &Q[Qlen-1]){
-//     //             Qtail = &Q[0];
-//     //         }
-//     //         else Qtail++;
-//     //     }
-//     //     // پیچیدگی: O(1)
-//     // }
-//     bool QIsEmpty() {
-//         if (qSize() == 0)
-//             return true;
-//         return false;
-//         // پیچیدگی: O(1)
-//     }
-//     Subtask dequeue() {
-//         if (QIsEmpty()) {
-//             cout << "Underflow!" << endl;
-//         } else {
-//             Subtask x = *Qhead;
-//             // *Qhead = 0;
-//             QSize--;
-//             // if(&Qhead == &subtasks[Qlen-1]){
-//             //     Qhead = *subtasks[0];
-//             // }
-//             // else Qhead++;
-//             return x;
-//         }
-//         // پیچیدگی: O(1)
-//     }
-// };
-
 class Linklist {
 public:
     Subtask *head;
@@ -151,57 +141,45 @@ public:
         tail = nullptr;
         size = 0;
     }
-    // پیچیدگی حافظه = O(1)
-    //  پیچیدگی زمانی = O(1)
-    // void insert(string name, string exp, string state, int y, int m, int d)
-    // {
-    //    Subtask *n = new Subtask(name, exp, state, y, m, d, nullptr, head);
-    //    if (head == nullptr)
-    //    {
-    //       head = n;
-    //       tail = n;
-    //       size++;
-    //    }
-    //    else
-    //    {
-    //       head->next = n;
-    //       head = n;
-    //       size++;
-    //    }
-    // }
-    // پیچیدگی حافظه ندارد
-    //  پیچیدگی زمانی = O(1)
-    void delNode(Subtask *node) {
-        if (node == nullptr)
-            return;
-        if (node->previous != nullptr)
-            node->previous->next = node->next;
-        else
-            tail = node->next;
-        if (node->next != nullptr)
-            node->next->previous = node->previous;
-        else
-            head = node->previous;
-        size--;
-        delete node;
+    void insert(Subtask *sub, Task*t) {
+        sub->parent = t;
+        sub->previous = head;
+        if (head == nullptr) {
+            head = sub;
+            tail = sub;
+        } else {
+            head->next = sub;
+            head = sub;
+        }
+        size++;
     }
-    // پیچیدگی حافظه = O(1)
-    //  پیچیدگی زمانی = O(n)
-    // subtask *search(int key){
-    //     subtask * node = tail;
-    //     while(node != nullptr && node->key != key)
-    //         node = node->next;
-    //     return node;
-    // }
+    void delNode(Subtask *subtask) {
+        if (subtask == nullptr)
+            return;
+        if (subtask->previous != nullptr)
+            subtask->previous->next = subtask->next;
+        else
+            tail = subtask->next;
+        if (subtask->next != nullptr)
+            subtask->next->previous = subtask->previous;
+        else
+            head = subtask->previous;
+        size--;
+        delete subtask;
+    }
 };
 class Task {
 public:
     string name, description, status;
-    Task* parent;
+    Task *parent;
     Task *rightSibling;
-    Task *leftChild;
+    Subtask *leftChild;
     Linklist subtasks;
+    Deadline deadline;
     Task() {
+        parent = nullptr;
+        rightSibling = nullptr;
+        leftChild = nullptr;
         string str;
         cout << "Enter task: ";
         cin.ignore();
@@ -210,7 +188,12 @@ public:
         name = ss[0];
         description = ss[1];
         status = ss[3];
-        Deadline deadline(ss[2]);
+        deadline.makeDeadline(ss[2]);
+    }
+    void addSubtask(Subtask *sub, Task*t) {
+        subtasks.insert(sub,t);
+        if(t->subtasks.size == 1)
+            t->leftChild = sub;
     }
 };
 class TreeRoot {
@@ -221,13 +204,13 @@ public:
         root = nullptr;
         leftChild = nullptr;
     }
-    void addTask(Task *t){
-        if(leftChild == nullptr){
+    void addTask(Task *t) {
+        if (leftChild == nullptr) {
             t->parent = root;
             leftChild = t;
-        }else{
+        } else {
             Task *x = leftChild;
-            while(x->rightSibling != nullptr){
+            while (x->rightSibling != nullptr) {
                 x = x->rightSibling;
             }
             x->rightSibling = t;
@@ -242,29 +225,37 @@ public:
 //     vector<string> ss = addTaskExtractInformations(str);
 //     return new Task t(ss);
 // }
-void menu(TreeRoot *R) {
+void menu(TreeRoot *Root) {
     int choice;
     do {
         cout << "menu:" << endl;
-        cout << "1.sabte etelaat" << endl;
-        cout << "2.entekhab vahed" << endl;
-        cout << "3.bazyabi etelaat" << endl;
-        cout << "4.namayesh jadval doroos va daneshjoo" << endl;
-        cout << "5.sabte etelaat dar file matni" << endl;
-        cout << "6.bazyabie etelaat az file matni" << endl;
-        cout << "0.3bar 0 ra bezanid ta kharej shavad" << endl;
+        cout << "1.Add task" << endl;
+        cout << "2.Add subtask" << endl;
+        // cout << "3.bazyabi etelaat" << endl;
+        // cout << "4.namayesh jadval doroos va daneshjoo" << endl;
+        // cout << "5.sabte etelaat dar file matni" << endl;
+        // cout << "6.bazyabie etelaat az file matni" << endl;
+        cout << "0.Exit" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
 
         switch (choice) {
-        case 1:{
+        case 1: {
+            isTask = true;
             Task *t = new Task;
-            R->addTask(t);
+            Root->addTask(t);
             break;
         }
-        // case 2:
-        //    entekhab_vahed();
-        //    break;
+        case 2:{
+            isTask = false;
+            Subtask *sub = new Subtask();
+            Task* T = Root->leftChild;
+            string currentTaskName = sub->taskName;
+            while(T->name != currentTaskName)
+                T = T->rightSibling;
+            T->addSubtask(sub,T);
+            break;
+        }
         // case 3:
         //    bazyabi_etelaat();
         //    break;
@@ -287,7 +278,7 @@ void menu(TreeRoot *R) {
 int main() {
     cout << "Hi! At first please tell me today's date: ";
     cin >> currentYear >> currentMonth >> currentDay;
-    cout<<"First add root task\n";
+    cout << "First add root task\n";
     TreeRoot R;
     R.root = new Task;
     menu(&R);
