@@ -12,11 +12,14 @@ int leftDaysCalculator(int year, int month, int day)
       result += (year - (currentYear + 1)) * 365;
       year = currentYear + 1;
    }
-   while (month > currentMonth)
+   while (year > currentYear || month > currentMonth)
    {
-      result += monthsDays[month--];
+      result += monthsDays[--month];
       if (month == 0)
-         month = 12;
+      {
+         month = 13;
+         year--;
+      }
    }
    result += day - currentDay;
    return result;
@@ -41,19 +44,13 @@ vector<string> addTaskExtractInformations(string str)
    result.push_back(word);
    return result;
 }
-
 class Deadline
 {
 public:
    int year, month, day, leftDays, hour, minute;
    Deadline(string str)
    {
-      int arr[3];
-      for (int i = 0; i < 3; i++)
-      {
-         arr[i] = 0;
-      }
-
+      int arr[] = {0, 0, 0};
       int i = 0, j = 0;
       while (str[i] != ' ')
       {
@@ -68,6 +65,8 @@ public:
          arr[j] *= 10;
          i++;
       }
+      i++;
+      j = 0;
       while (str[i] != ':')
       {
          j += str[i] - 48;
@@ -76,10 +75,10 @@ public:
       }
       hour = j / 10;
       i++;
-      minute = str[i++] * 10 + str[i];
+      minute = (str[i++] - 48) * 10 + (str[i] - 48);
       year = arr[0];
       month = arr[1];
-      day = arr[2];
+      day = arr[2] / 10;
       leftDays = leftDaysCalculator(year, month, day);
    }
 };
@@ -161,7 +160,7 @@ class Task
 {
 public:
    string name, description, status;
-   Linklist subtasks;
+   Linklist *subtasks;
    Task(vector<string> str)
    {
       name = str[0];
@@ -169,6 +168,11 @@ public:
       status = str[3];
       Deadline deadline(str[2]);
    }
+};
+class Tree
+{
+public:
+   Task *root;
 };
 void addTask()
 {
@@ -227,6 +231,5 @@ int main()
    cout << "Hi! At first please tell me today's date: ";
    cin >> currentYear >> currentMonth >> currentDay;
    menu();
-   // Task t();
    return 0;
 }
