@@ -20,13 +20,36 @@ int leftDaysCalculator(int year, int month, int day) {
     result += day - currentDay;
     return result;
 }
-bool isTask = true;
+int isTaskOrSubtask=1;
+bool checkCorrectAddingCommand(int i, string str){
+    if (isTaskOrSubtask == 1) {
+        string s = "add task ";
+        for (int j = 0; j < i; ++j) {
+            if (s[j] != str[j]) {
+                return false;
+            }
+        }
+    }else{
+        string s = "add subtask ";
+        for (int j = 0; j < i; ++j) {
+            if (s[j] != str[j]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 vector<string> addTaskExtractInformations(string str) {
     vector<string> result;
     string word;
     int i = 9;
-    if (!isTask)
-        i += 3;
+    if (isTaskOrSubtask == 2){
+        i += 3;       
+    }
+    if(!checkCorrectAddingCommand(i,str)){
+        cout<<"Error! You Entered a wrong command\n";
+        return {};
+    }
     while (i < int(str.length())) {
         if (str[i] == ',') {
             result.push_back(word);
@@ -40,41 +63,12 @@ vector<string> addTaskExtractInformations(string str) {
     result.push_back(word);
     return result;
 }
+class Task;
+
 class Deadline {
 public:
     int year, month, day, leftDays, hour, minute;
     string date;
-    // Deadline() {
-    //     // int arr[] = {0, 0, 0};
-    //     // int i = 0, j = 0;
-    //     // while (str[i] != ' ') {
-    //     //     if (str[i] == '/') {
-    //     //         i++;
-    //     //         arr[j] /= 10;
-    //     //         j++;
-    //     //         continue;
-    //     //     }
-    //     //     arr[j] += str[i] - 48;
-    //     //     arr[j] *= 10;
-    //     //     date += str[i];
-    //     //     i++;
-    //     // }
-    //     // arr[2] /= 10;
-    //     // i++;
-    //     // j = 0;
-    //     // while (str[i] != ':') {
-    //     //     j += str[i] - 48;
-    //     //     j *= 10;
-    //     //     i++;
-    //     // }
-    //     // hour = j / 10;
-    //     // i++;
-    //     // minute = (str[i++] - 48) * 10 + (str[i] - 48);
-    //     // year = arr[0];
-    //     // month = arr[1];
-    //     // day = arr[2];
-    //     // leftDays = leftDaysCalculator(year, month, day);
-    // }
     void makeDeadline(string str) {
         int arr[] = {0, 0, 0};
         int i = 0, j = 0;
@@ -107,7 +101,6 @@ public:
         date = to_string(year) + '/' + to_string(month) + '/' + to_string(day);
     }
 };
-class Task;
 class Subtask {
 public:
     string name, description, status, taskName;
@@ -121,6 +114,7 @@ public:
         cin.ignore();
         getline(cin, str);
         vector<string> ss = addTaskExtractInformations(str);
+        // if(ss.has_v)
         name = ss[0];
         description = ss[1];
         status = ss[3];
@@ -168,6 +162,7 @@ public:
         delete subtask;
     }
 };
+vector<string>ss;
 class Task {
 public:
     string name, description, status;
@@ -176,6 +171,10 @@ public:
     Subtask *leftChild;
     Linklist subtasks;
     Deadline deadline;
+    void deleteIncorrectTask(Task *t){
+        delete t;
+        t = nullptr;
+    }
     Task() {
         parent = nullptr;
         rightSibling = nullptr;
@@ -184,11 +183,19 @@ public:
         cout << "Enter task: ";
         cin.ignore();
         getline(cin, str);
-        vector<string> ss = addTaskExtractInformations(str);
+        ss = addTaskExtractInformations(str);
+        if(ss.size()<1){
+            // ~Task();
+            return;
+        }
         name = ss[0];
         description = ss[1];
         status = ss[3];
         deadline.makeDeadline(ss[2]);
+    }
+    ~Task(){
+        if(ss.size()<1)
+        deleteIncorrectTask(this);
     }
     void addSubtask(Subtask *sub, Task*t) {
         subtasks.insert(sub,t);
@@ -198,15 +205,15 @@ public:
 };
 class TreeRoot {
 public:
-    Task *root;
+    Task *itself;
     Task *leftChild;
     TreeRoot() {
-        root = nullptr;
+        itself = nullptr;
         leftChild = nullptr;
     }
     void addTask(Task *t) {
         if (leftChild == nullptr) {
-            t->parent = root;
+            t->parent = itself;
             leftChild = t;
         } else {
             Task *x = leftChild;
@@ -241,19 +248,22 @@ void menu(TreeRoot *Root) {
 
         switch (choice) {
         case 1: {
-            isTask = true;
+            isTaskOrSubtask = 1;
             Task *t = new Task;
+            if(t!=nullptr)
             Root->addTask(t);
             break;
         }
         case 2:{
-            isTask = false;
+            isTaskOrSubtask = 2;
             Subtask *sub = new Subtask();
             Task* T = Root->leftChild;
             string currentTaskName = sub->taskName;
-            while(T->name != currentTaskName)
+            while(T != nullptr && T->name != currentTaskName)
                 T = T->rightSibling;
-            T->addSubtask(sub,T);
+            if(T!=nullptr)
+                T->addSubtask(sub,T);
+            else delete sub;
             break;
         }
         // case 3:
@@ -280,7 +290,7 @@ int main() {
     cin >> currentYear >> currentMonth >> currentDay;
     cout << "First add root task\n";
     TreeRoot R;
-    R.root = new Task;
+    R.itself = new Task;
     menu(&R);
     return 0;
 }
