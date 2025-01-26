@@ -117,7 +117,7 @@ public:
     Deadline deadline;
     Subtask() {
         string str;
-        cout << "Enter task: ";
+        cout << "Enter subtask: ";
         cin.ignore();
         getline(cin, str);
         vector<string> ss = addTaskExtractInformations(str);
@@ -356,13 +356,13 @@ void ChangingSubtaskStatus(TreeRoot *Root){
             while(sub){
                 if(sub->name==ss[1]){
                     sub->status=ss[2];
-                    checkDeletingTask(Root,T);
                     cout<<"Status changed\n";
+                    checkDeletingTask(Root,T);
                     return;
                 }
                 sub=sub->next;
             }
-            cout<<"Subtask wasn't found\n";
+            cout<<"Subtask wasn't found\n";return;
         }
         T=T->rightSibling;
     }
@@ -402,12 +402,14 @@ void showAllTasks(Task *T) {
     }
 }
 void saveInTXTFile(TreeRoot *Root){
-    ofstream file("TreeDSproject.txt",ios::app);
+    ofstream file("TreeDSproject.txt");
     if(file.is_open()){
         file.clear();
+        file<<"Root: "<<endl;
+        file<<"Name: "<<Root->itself->name<<", Description: "<<Root->itself->description<<", Status: "<<Root->itself->status<<", Deadline: "<<Root->itself->deadline.date<<endl<<endl;
         Task *T = Root->leftChild;
         while(T){
-            file<<"Name: "<<T->name<<" ,Description: "<<T->description<<" ,Status: "<<T->status<<" ,Deadline: "<<T->deadline.date<<endl;
+            file<<"Name: "<<T->name<<", Description: "<<T->description<<", Status: "<<T->status<<", Deadline: "<<T->deadline.date<<endl;
             file<<"Subtasks: ";
             if(T->leftChild==nullptr)
                 file<<"There isn't any subtasks\n"<<endl;
@@ -415,7 +417,7 @@ void saveInTXTFile(TreeRoot *Root){
                 file<<endl;
                 Subtask*sub=T->leftChild;
                 while(sub){
-                    file<<"Name: "<<sub->name<<" ,Description: "<<sub->description<<" ,Status: "<<sub->status<<" ,Deadline: "<<sub->deadline.date<<endl;
+                    file<<"Name: "<<sub->name<<", Description: "<<sub->description<<", Status: "<<sub->status<<", Deadline: "<<sub->deadline.date<<endl;
                     sub = sub->next;
                 }
                 file<<endl;
@@ -430,10 +432,10 @@ void saveInTXTFile(TreeRoot *Root){
 void bazyabi_az_file(){
     ifstream file("TreeDSproject.txt");
     if(file.is_open()){
-        string name;
+        string s;
         while(file){
-            getline(file,name);
-            cout<<name<<endl;
+            getline(file,s);
+            cout<<s<<endl;
         }
         file.close();
     }
@@ -497,7 +499,7 @@ void menu(TreeRoot *Root) {
         case 6:
             saveInTXTFile(Root);
             break;
-        case 7:
+        case 7://set tree left
             bazyabi_az_file();
             break;
         case 0:
