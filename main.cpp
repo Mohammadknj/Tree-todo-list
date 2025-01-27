@@ -137,6 +137,7 @@ public:
         deadline.makeDeadline(ss[2]);
     }
 };
+class Linklist;
 class Linklist {
 public:
     Subtask *head;
@@ -176,6 +177,19 @@ public:
         size--;
         delete subtask;
         subtask = nullptr;
+    }
+    void printList(string space, string taskName) {
+        if (head == nullptr) {
+            cout << space << "    There is not any subtask for " << taskName << endl;
+            return;
+        }
+        Subtask *sub = tail;
+        while (sub) {
+            cout << space << "    Name: " << sub->name
+                 << ", Description: " << sub->description
+                 << ", Staus: " << sub->status << ", " << sub->taskName << endl;
+            sub = sub->next;
+        }
     }
 };
 class Task {
@@ -403,6 +417,10 @@ void showAllTasks(TreeRoot *Root) {
     }
 }
 void saveInTXTFile(TreeRoot *Root) {
+    if(Root==nullptr){
+        cout<<"There isn't any roots\n";
+        return;
+    }
     ofstream file("TreeDSproject.txt");
     if (file.is_open()) {
         file.clear();
@@ -444,11 +462,54 @@ void retrieveFromTXTfile() {
         string s;
         while (file) {
             getline(file, s);
-            cout << s << endl;
+            cout << endl << s;
         }
         file.close();
     } else
         cout << "Unable to open file\n";
+}
+void BFS(TreeRoot *Root) {
+    cout << "\nRoot: " << endl;
+    cout << "    Name: " << Root->itself->name
+         << ", Description: " << Root->itself->description
+         << ", Status: " << Root->itself->status << endl;
+    cout << "Tasks: " << endl;
+    Task *T = Root->leftChild;
+    if (T == nullptr) {
+        cout << "There isn't any tasks\n";
+        return;
+    }
+    while (T) {
+        cout << "    Name: " << T->name << ", Description: " << T->description
+             << ", Status: " << T->status << endl;
+        T = T->rightSibling;
+    }
+    cout << "Subtasks: " << endl;
+    T = Root->leftChild;
+    while (T) {
+        T->subtasks.printList("", T->name);
+        T = T->rightSibling;
+    }
+    cout << endl;
+}
+void DFS(TreeRoot *Root) {
+    cout << "\nRoot: " << endl;
+    cout << "    Name: " << Root->itself->name
+         << ", Description: " << Root->itself->description
+         << ", Status: " << Root->itself->status << endl;
+    Task *T = Root->leftChild;
+    if (T == nullptr) {
+        cout << "There isn't any tasks\n\n";
+        return;
+    }
+    while (T) {
+        cout << endl;
+        cout << "\tName: " << T->name << ", Description: " << T->description
+             << ", Status: " << T->status << endl;
+        cout << "\tSubtasks:\n";
+        T->subtasks.printList("\t", T->name);
+        T = T->rightSibling;
+    }
 }
 void menu(TreeRoot *Root) {
     int choice;
@@ -461,6 +522,8 @@ void menu(TreeRoot *Root) {
         cout << "5.Show All Tasks sorted" << endl;
         cout << "6.Save tree in a txt file" << endl;
         cout << "7.Retrieve last tree from a txt file" << endl;
+        cout << "8.BFS Traverse" << endl;
+        cout << "9.DFS Traverse" << endl;
         cout << "0.Exit" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
@@ -508,8 +571,14 @@ void menu(TreeRoot *Root) {
         case 6:
             saveInTXTFile(Root);
             break;
-        case 7: // set tree left
+        case 7:
             retrieveFromTXTfile();
+            break;
+        case 8:
+            BFS(Root);
+            break;
+        case 9:
+            DFS(Root);
             break;
         case 0:
             break;
