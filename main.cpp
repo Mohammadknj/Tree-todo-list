@@ -590,10 +590,9 @@ int main() {
     cout << "Hi! At first please tell me today's date: ";
     cin >> currentYear >> currentMonth >> currentDay;
     cout << "First add root task\n";
-    TreeRoot *R = new TreeRoot;
-    R->itself = new Task;
-    menu(R);
-    delete R;
-    R = nullptr;
+    TreeRoot R;
+    R.itself = new Task;
+    menu(&R);
+    cout << "See you later! BYE!! :)" << endl;
     return 0;
 }
